@@ -2,7 +2,7 @@
 
 - [x] Crear Github --> Francis  
 - [x] Crear Trello --> Mario  
-Tareas  
+## Tareas  
     - [ ] Robots limpiadores --> Mario  
     - [ ] Programar Giraquesos --> Vicente  
     - [ ] Montaje / Layout General --> Francis    (Prioridad)  
