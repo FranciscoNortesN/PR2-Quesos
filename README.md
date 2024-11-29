@@ -3,14 +3,22 @@
 
 Enlace al [trello](https://trello.com/invite/b/6749d3d5c32a6eb9e5fb8631/ATTI2e040ac37c2c702121b695701ffa3c08C11DA7CE/proyecto-ii)  
 ## Tareas  
-- [x] Crear Github --> Francis  
-- [x] Crear Trello --> Mario  
-- [ ] Robots limpiadores --> Mario  
-- [ ] Programar Giraquesos --> Vicente  
-- [ ] Montaje / Layout General --> Francis    (Prioridad)  
-- [ ] Bañera --> Kai  
-- [ ] Pensar Deja bandejas --> Mario  
-- [ ] AGV --> Vicente  
-- [ ] Anclaje tornaburras --> Mario  
-- [ ] Tutorial a xinxong2 --> Francis  
-
+<!--  Esto es un comentario, no se verá en la "preview" --> 
+<!--Si es posible, editad el proceso que esteis realizando para que así se vea -->
+|Proceso|Tarea|Responsable|Etiquetas|Prioridad|Fecha límite|
+|:-----:|:----|:----------|:--------|:-------:|:-----------|
+| ✅ |Crear Github|Francisco||||
+| ✅ |Crear Trello|Mario||||
+| ✅ |Anclaje tornaburras|Mario||🚨 Alta|03/12/2024|
+| ❌ |Bañera|Kai||🚨 Alta|03/12/2024|
+| ⏳ |Sistema recoge bandeja|Mario||🚨 Alta|03/12/2024|
+| ⏳ |AGV|Vicente||🚨 Alta|03/12/2024|
+| ⏳ |Montaje / Layout General|Francisco||🚨 Alta|03/12/2024|
+| ❌ |Programar Robots Limpiadores|Mario||⚖️ Media||
+| ❌ |Programar Giraquesos|Vicente||⚖️ Media||
+| ❌ |Programar despaletizador|||⚖️ Media||
+| ❌ |Programar PLC|Vicente||💤 Baja||
+| ❌ |Programar pantalla|Vicente||💤 Baja||
+| ❌ |Comunicación PLC - RoboDK|Vicente||💤 Baja|
+| ❌ |Hacer grafcets|Vicente||💤 Baja||
+| ❌ |Crear Página Web||`# Por Confirmar`||
