@@ -10,9 +10,9 @@ Enlace al [trello](https://trello.com/invite/b/6749d3d5c32a6eb9e5fb8631/ATTI2e04
 | ✅ |Crear Github|Francisco||||
 | ✅ |Crear Trello|Mario||||
 | ✅ |Anclaje tornaburras|Mario||🚨 Alta|03/12/2024|
-| ❌ |Bañera|Kai||🚨 Alta|03/12/2024|
+| ✅ |Bañera|Kai||🚨 Alta|03/12/2024|
 | ✅ |Sistema recoge bandeja|Mario||🚨 Alta|03/12/2024|
-| ⏳ |AGV|Vicente||🚨 Alta|03/12/2024|
+| ✅ |AGV|Vicente||🚨 Alta|03/12/2024|
 | ⏳ |Montaje / Layout General|Francisco||🚨 Alta|03/12/2024|
 | ❌ |Programar Robots Limpiadores|Mario||⚖️ Media||
 | ❌ |Programar Giraquesos|Vicente||⚖️ Media||
