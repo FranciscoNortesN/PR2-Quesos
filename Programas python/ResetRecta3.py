@@ -5,10 +5,10 @@ from robodk.robomath import *  # Importamos las herramientas matemáticas de Rob
 RDK = Robolink()
 
 # Obtener el mecanismo de la cinta transportadora
-cinta = RDK.Item('MecanismoCinta2', ITEM_TYPE_ROBOT)
+cinta = RDK.Item('MecanismoRecta3', ITEM_TYPE_ROBOT)
 
 if not cinta.Valid():
-    RDK.ShowMessage("Error: No se encontró un mecanismo llamado 'MecanismoCinta2'.")
+    RDK.ShowMessage("Error: No se encontró un mecanismo llamado 'MecanismoRecta3'.")
     exit()
 
 # Definir las juntas iniciales (reset a 0)
