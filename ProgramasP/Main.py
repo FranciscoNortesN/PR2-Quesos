@@ -8,14 +8,20 @@ from FuncionesQyB import *
 from Reset import *
 from FuncionesMovimientos import *
 
+print(f"Aviso, dependiendo de tu ordenador, el estado de la estación antes de ejecutar el programa y si se ha ejecutado el programa antes, puede tardar un poco en ejecutarse.")
 reset()
-print(f"Todo Reseteado, Empezamos")
+print(f"Todo Reseteado, Inicializando el programa...")
+
+readys = []
 
 def secuencia_inicio():
     preQueso = getItem(getLastQueso(), ITEM_TYPE_OBJECT)
     preBandeja = getItem(getLastBandeja(), ITEM_TYPE_OBJECT)
     frame = getFrame("Objeto_CintaQueso1")
-    while True:
+    for ready in readys:
+        ready.wait()
+    print("Programa inicializado, empezamos")
+    while not work.is_set():
         queso = addQueso()
         bandeja = addBandeja()
         setParent(frame, preQueso)
@@ -28,19 +34,25 @@ def secuencia_inicio():
         preBandeja = bandeja
         time.sleep(14)
 
-
 hilos = []
-t = threading.Thread(target=cintaInicio)
-t.start()
-hilos.append(t)
 
-t = threading.Thread(target=curvaInicio)
+ready = threading.Event()
+t = threading.Thread(target=cintaInicio, args=(ready,))
 t.start()
 hilos.append(t)
+readys.append(ready)
 
-t = threading.Thread(target=separaBandejas)
+ready = threading.Event()
+t = threading.Thread(target=curvaInicio, args=(ready,))
 t.start()
 hilos.append(t)
+readys.append(ready)
+
+ready = threading.Event()
+t = threading.Thread(target=separaBandejas, args=(ready,))
+t.start()
+hilos.append(t)
+readys.append(ready)
 
 sensores = ["SensorQueso5", "SensorQueso6", "SensorQueso7", "SensorQueso8",
             "SensorQueso9", "SensorQueso10", "SensorBandeja1", "SensorBandeja2",
@@ -49,29 +61,42 @@ sensores = ["SensorQueso5", "SensorQueso6", "SensorQueso7", "SensorQueso8",
             "SensorBandeja11", "SensorBandeja12", "SensorBandeja13", "SensorBandeja14"]
 
 for sensor in sensores:
-    t = threading.Thread(target=cintas, args=(sensor,))
+    ready = threading.Event()
+    t = threading.Thread(target=cintas, args=(sensor, ready,))
     t.start()
     hilos.append(t)
+    readys.append(ready)
 
-t = threading.Thread(target=giraQuesos)
+ready = threading.Event()
+t = threading.Thread(target=giraQuesos, args=(ready,))
 t.start()
 hilos.append(t)
+readys.append(ready)
 
-t = threading.Thread(target=Guia)
+ready = threading.Event()
+t = threading.Thread(target=Guia, args=(ready,))
 t.start()
 hilos.append(t)
+readys.append(ready)
 
-t = threading.Thread(target=recogeBandejas)
+ready = threading.Event()
+t = threading.Thread(target=recogeBandejas, args=(ready,))
 t.start()
 hilos.append(t)
+readys.append(ready)
 
-t = threading.Thread(target=paletizador)
+ready = threading.Event()
+t = threading.Thread(target=paletizador, args=(ready,))
 t.start()
 hilos.append(t)
+readys.append(ready)
 
 t = threading.Thread(target=secuencia_inicio)
 t.start()
 hilos.append(t)
+
+time.sleep(180)
+killThreads()
 
 for hilo in hilos:
     hilo.join()

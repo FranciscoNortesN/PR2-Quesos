@@ -166,7 +166,7 @@ agv = getRobot("AGV")
 
 # Ejecutar
 grafo = initGrafo()
-camino = grafo.camino("baseCarga", "estanteriaB222")
+camino = grafo.camino("estanteriaB222", "Central1")
 camino3d = generarCamino3D(camino)
 if camino3d is None:
     print("No se encontró un camino.")
@@ -176,38 +176,3 @@ else:
     for i in range(len(camino3d)):
         moveTo(agv, camino3d[i])
 visualizarGrafo(grafo, posiciones_destacadas=camino)
-
-
-""" 
-    3 almacenes
-    cada almacen tiene 2 filas
-    cada fila tiene estanterías a los lados
-    cada fila tiene 4 estanterías
-
-    hay un pasillo que conecta los 3 almacenes,
-    los lugares de carga y descarga y la base de carga
-
-    si hablamos de nodos, el pasillo posee un nodo por el lugar
-    de carga, otro por el lugar de descarga y otro por la base de carga
-    además de 3 nodos por cada entrada a los almacenes.
-
-    si hablamos de los almacenes, cada uno tiene un nodo al entrar
-    y uno en la entrada de cada fila
-
-    si hablamos de cada fila, cada una tiene un nodo por cada pareja de estanterías
-    y ese nodo se conecta con los nodos de las estanterías que se encuentran a los lados
-
-    si hablamos de los lugares de carga y descarga y la base de carga, 
-    cada uno tiene un nodo
-
-    cada uno de estos nodos tiene 4 nodos orientados, de los cuales
-    se conectan aquellos que se encuentran en la misma dirección con los demás nodos
-    cada nodo orientado se conecta con los demás nodos orientados del mismo nodo
-
-
-
-    tipo:almacen / carga / descarga
-    almacen:
-    fila:
-    estantería
-"""

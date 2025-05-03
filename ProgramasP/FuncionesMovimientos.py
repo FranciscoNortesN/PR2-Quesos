@@ -7,6 +7,19 @@ from CallPrograms import *
 from FuncionesQyB import *
 from Reset import *
 
+work = threading.Event()
+
+def killThreads():
+    work.set()
+    for thread in threading.enumerate():
+        if thread is not threading.current_thread():
+            thread.join()
+    print("Todos los hilos han terminado.", False)
+
+def reviveThreads():
+    work.clear()
+    print("Todos los hilos han revivido.", False)
+
 """ está puesto de tal manera que el sensor tiene asociado un mecanismo,
 un objetivo en el que el mecanismo acaba dejando ya sea el queso o la bandeja
 y unas coordenadas, que son hasta donde se mueve el mecanismo """
@@ -33,7 +46,7 @@ configuracionesGeneral = {
     "SensorBandeja14":("MecanismoCurvaBandeja14","Objeto_Guia1",[3]),
 }
 
-def cintaInicio():
+def cintaInicio(ready):
     #Definimos las variables antes del bucle infinito para que no se creen cada vez que se entra en el bucle
     detector = getItem("SensorInicio", ITEM_TYPE_OBJECT)
     robot = getRobot("MecanismoCintaQueso1")
@@ -53,7 +66,9 @@ def cintaInicio():
         if itemB is not None:
             detectaB.append(itemB)
 
-    while True:
+    ready.set()
+
+    while not work.is_set():
         listaQ = getAllQuesos()
         if len(listaQ) > len(detectaQ):
             nuevoQ = getLastQueso()
@@ -77,7 +92,7 @@ def cintaInicio():
             resetMecanismo("MecanismoCintaQueso1")
 
 
-def curvaInicio():
+def curvaInicio(ready):
     #Definimos las variables antes del bucle infinito para que no se creen cada vez que se entra en el bucle
     detector=getItem("SensorQueso1",ITEM_TYPE_OBJECT)
     robot=getRobot("MecanismoCurvaQueso3")
@@ -97,7 +112,9 @@ def curvaInicio():
         if itemB is not None:
             detectaB.append(itemB)
 
-    while True:
+    ready.set()
+
+    while not work.is_set():
         listaQ = getAllQuesos()
         if len(listaQ) > len(detectaQ):
             nuevoQ = getLastQueso()
@@ -120,7 +137,7 @@ def curvaInicio():
             setParent(frame,bandeja)
             resetMecanismo("MecanismoCurvaQueso3")
 
-def separaBandejas():
+def separaBandejas(ready):
     #Definimos las variables antes del bucle infinito para que no se creen cada vez que se entra en el bucle
     detector=getItem("SensorSeparaBandejas1",ITEM_TYPE_OBJECT)
     robot=getRobot("MecanismoSeparaBandejas1")
@@ -143,7 +160,9 @@ def separaBandejas():
         if itemQ is not None:
             detectaQ.append(itemQ)
 
-    while True:
+    ready.set()
+
+    while not work.is_set():
         listaB = getAllBandejas()
         if len(listaB) > len(detectaB):
             nuevoB = getLastBandeja()
@@ -174,7 +193,7 @@ def separaBandejas():
             resetMecanismo("MecanismoSeparaBandejas1")
             resetMecanismo("MecanismoSeparaBandejas2")
 
-def cintas(nombreSensor):
+def cintas(nombreSensor, ready):
     #Definimos las variables antes del bucle infinito para que no se creen cada vez que se entra en el bucle
     if "Queso" in nombreSensor:
         objeto = []
@@ -194,7 +213,10 @@ def cintas(nombreSensor):
     detector=getItem(nombreSensor,ITEM_TYPE_OBJECT)
     robot=getRobot(mecanismo)
     objetivo=getFrame(objetivo)
-    while True:
+
+    ready.set()
+
+    while not work.is_set():
         # Comprobamos si hay un nuevo objeto en la lista de objetos
         lista = getAllQuesos() if "Queso" in nombreSensor else getAllBandejas()
         if len(lista) > len(objeto):
@@ -209,7 +231,7 @@ def cintas(nombreSensor):
             setParent(objetivo, num)
             resetMecanismo(mecanismo)
 
-def giraQuesos():
+def giraQuesos(ready):
     #Definimos las variables antes del bucle infinito para que no se creen cada vez que se entra en el bucle
     detector=getItem("SensorGiraQuesos",ITEM_TYPE_OBJECT)
     robot=getRobot("MecanismoEntrada")
@@ -223,7 +245,9 @@ def giraQuesos():
         if itemQ is not None:
             detectaQ.append(itemQ)
 
-    while True:
+    ready.set()
+
+    while not work.is_set():
         listaQ = getAllQuesos()
         if len(listaQ) > len(detectaQ):
             nuevoQ = getLastQueso()
@@ -242,7 +266,7 @@ def giraQuesos():
             resetMecanismo("MecanismoGiraQuesos")
             resetMecanismo("MecanismoGravedad")
 
-def Guia():
+def Guia(ready):
     #Definimos las variables antes del bucle infinito para que no se creen cada vez que se entra en el bucle
     detector=getItem("SensorGuia1",ITEM_TYPE_OBJECT)
     robot=getRobot("MecanismoGuia1")
@@ -259,7 +283,9 @@ def Guia():
         if itemB is not None:
             detectaB.append(itemB)
 
-    while True:
+    ready.set()
+
+    while not work.is_set():
         listaB = getAllBandejas()
         if len(listaB) > len(detectaB):
             nuevoB = getLastBandeja()
@@ -279,7 +305,7 @@ def Guia():
             resetMecanismo("MecanismoGuia2")
             resetMecanismo("MecanismoGuia3")
 
-def recogeBandejas():
+def recogeBandejas(ready):
     #Definimos las variables antes del bucle infinito para que no se creen cada vez que se entra en el bucle
     detector=getItem("SensorQueso11",ITEM_TYPE_OBJECT)
     robot=getRobot("MecanismoFinal")
@@ -299,7 +325,9 @@ def recogeBandejas():
         if itemB is not None:
             detectaB.append(itemB)
 
-    while True:
+    ready.set()
+
+    while not work.is_set():
         listaQ = getAllQuesos()
         if len(listaQ) > len(detectaQ):
             nuevoQ = getLastQueso()
@@ -322,7 +350,7 @@ def recogeBandejas():
             setParent(frame,bandeja)
             resetMecanismo("MecanismoFinal")
 
-def paletizador():
+def paletizador(ready):
     robot = getRobot("UR20")
     frame = getFrame("Fork_Frame")
     detector = getItem("SensorPick", ITEM_TYPE_OBJECT)
@@ -357,7 +385,9 @@ def paletizador():
         if itemB is not None:
             bandejas.append(itemB)
 
-    while True:
+    ready.set()
+
+    while not work.is_set():
         listaQ = getAllQuesos()
         listaB = getAllBandejas()
 

@@ -74,3 +74,15 @@ else:
         print(f"Posición {i}: {camino[i]}")
 print("Camino encontrado:", camino)
 grafo.printGrafo()
+
+from mqtt_modular import *
+
+def callback(topic, payload):
+    print(f"Mensaje recibido en {topic}: {payload}")
+
+set_prefix("PR2/A9/")
+setup_mqtt()
+publish("test", "Hello, world!")
+register_callback("test", callback)
+while True:
+    pass
