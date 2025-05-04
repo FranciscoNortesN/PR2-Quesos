@@ -6,7 +6,7 @@
 #include "freertos/event_groups.h"
 
 #define WIFI_CONNECTED_BIT BIT0
-#define WIFI_MAX_WAIT_TIME_MS 1000 // Tiempo máximo de espera para la conexión Wi-Fi
+#define WIFI_MAX_WAIT_TIME_MS 5000 // Tiempo máximo de espera para la conexión Wi-Fi
 static EventGroupHandle_t wifi_event_group;
 static const char *TAG = "COM";
 
@@ -129,17 +129,26 @@ error_code_t mqtt_publish(mqtt_config_t *mqtt_config, const char *topic, const c
 
 // Crear JSON
 error_code_t mqtt_create_json(int8_t temperature, uint8_t humidity, uint8_t battery_level, char **json_string)
-{
+{   ESP_LOGI("TAG", "Creando JSON...");
     cJSON *root = cJSON_CreateObject();
     if (root == NULL) {
+        ESP_LOGI(TAG, "Error al crear el objeto JSON");
         return SensorError; // Error: no se pudo crear el objeto JSON
     }
+
     cJSON_AddNumberToObject(root, "temperatura", temperature);
     cJSON_AddNumberToObject(root, "humedad", humidity);
     cJSON_AddNumberToObject(root, "battery", battery_level);
     cJSON_AddStringToObject(root, "ID", "NT_1");
 
+
     *json_string = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
+    if (*json_string == NULL) {
+        ESP_LOGI(TAG, "Error al crear la cadena JSON");
+        return JSONError; // Error: no se pudo crear la cadena JSON
+    }else {
+        ESP_LOGI(TAG, "Cadena JSON creada: %s", *json_string);
+    }
     return NoError;
 }

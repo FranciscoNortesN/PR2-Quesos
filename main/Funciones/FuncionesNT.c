@@ -46,7 +46,8 @@ error_code_t get_data(int8_t *temperature, uint8_t *humidity, uint8_t *battery_l
 
     status = Get_battery_level(battery_level);
     if (status != NoError) {
-        return status; // Error en la lectura de la batería
+        //return status; // Error en la lectura de la batería
+        *battery_level = -1;
     }
 
     gpio_set_level(Pin_enable_divisorR, 0);
