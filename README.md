@@ -1,10 +1,32 @@
-# PR2-Quesos  
+# _Sample project_
 
-## Trello
-<img src="https://github.com/FranciscoNortesN/PR2-Quesos/blob/c71a6012343c211dd6c1d0e78572efb867f31242/im%C3%A1genes/imagen_2024-11-29_180350323.png" alt="Trello" width="300"/>  
+(See the README.md file in the upper level 'examples' directory for more information about examples.)
 
-Enlace al [trello](https://trello.com/invite/b/6749d3d5c32a6eb9e5fb8631/ATTI2e040ac37c2c702121b695701ffa3c08C11DA7CE/proyecto-ii)  
+This is the simplest buildable example. The example is used by command `idf.py create-project`
+that copies the project to user specified path and set it's name. For more information follow the [docs page](https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/build-system.html#start-a-new-project)
 
-## Servidor
-Enlace al [servidor](https://futurerobotics.es)
 
+
+## How to use example
+We encourage the users to use the example as a template for the new projects.
+A recommended way is to follow the instructions on a [docs page](https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/build-system.html#start-a-new-project).
+
+## Example folder contents
+
+The project **sample_project** contains one source file in C language [main.c](main/main.c). The file is located in folder [main](main).
+
+ESP-IDF projects are built using CMake. The project build configuration is contained in `CMakeLists.txt`
+files that provide set of directives and instructions describing the project's source files and targets
+(executable, library, or both). 
+
+Below is short explanation of remaining files in the project folder.
+
+```
+├── CMakeLists.txt
+├── main
+│   ├── CMakeLists.txt
+│   └── main.c
+└── README.md                  This is the file you are currently reading
+```
+Additionally, the sample project contains Makefile and component.mk files, used for the legacy Make based build system. 
+They are not used or needed when building with CMake and idf.py.
