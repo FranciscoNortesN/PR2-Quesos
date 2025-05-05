@@ -35,16 +35,16 @@ void app_main(void)
     if(!status){status = Enable_wifi(&wifi_config);}//funciona
     //if(!status){status = mqtt_connect(&mqtt_config);}//Por testar
     if(!status){status = get_data(&temperatura, &humedad, &bateria);}//funciona temperatura y humedad comprobar bateria
-    if(!status){status = mqtt_create_json(temperatura, humedad, bateria, &json_string);}
+    if(!status){status = mqtt_create_json(temperatura, humedad, bateria, &json_string);}//Funciona
     if(!status){status = mqtt_publish(&mqtt_config, mqtt_config.topic, json_string, 0);}
-    free(json_string);
+    free(json_string);//funciona
 
     ESP_LOGI("Iniciando apagado--------------------", "--------------------");
-    Disable_wifi();
+    Disable_wifi();//funciona
     mqtt_disconnect();
-    Show_status_led(status);
+    Show_status_led(status);//funciona
     ESP_LOGI("error", "Error: %d", status);
-    if(!status){status = Deep_sleep(5000);}
+    if(!status){status = Deep_sleep(5000);}//funciona
     
     Deep_sleep(1000);
 }
