@@ -130,8 +130,8 @@ CREATE TABLE IF NOT EXISTS robotagvinfo (
 
 CREATE TABLE IF NOT EXISTS rutas(
     "id_robot" char(10) NOT NULL,
-    "vnn_inicio" char(10) NOT NULL,
-    "vnn_destino" char(10) NOT NULL,
+    "inicio" char(10) NOT NULL,
+    "destino" char(10) NOT NULL,
     "fecha" timestamp NOT NULL DEFAULT NOW(),
     CONSTRAINT id_robot_rutas_fk FOREIGN KEY ("id_robot") REFERENCES robotagvinfo
     ON DELETE CASCADE ON UPDATE CASCADE,
