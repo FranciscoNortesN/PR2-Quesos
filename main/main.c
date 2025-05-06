@@ -88,6 +88,6 @@ void app_main(void)
     Show_status_led(status);}//funciona
     ESP_LOGI("wakeup", "Wakeup cause: %d", causa);
     ESP_LOGI("error", "Error: %d", status);
-    if(!status){status = Deep_sleep((TIMEPO_ENTRE_MUESTREO)-(time(NULL)-tiempo_actual)*1000);}//funciona
+    if(!status){status = Deep_sleep(((TIMEPO_ENTRE_MUESTREO)-(time(NULL)-tiempo_actual))*1000);}//funciona
     else{Deep_sleep(1000);}//en caso de erro se reinicia
 }
