@@ -1,4 +1,4 @@
-
+/*@file comunicaciones.h*/
 #ifndef COMUNICACIONES_H
 #define COMUNICACIONES_H
 
@@ -12,13 +12,18 @@
 #include <freertos/FreeRTOS.h>
 #include <string.h>
 
+
+
 #include "dht11.h"
 
 #include "error.h"
 
+extern volatile bool wifi_ready;
+extern volatile bool mqtt_ready;
+
 typedef struct
 {
-    char *broker; // Broker MQTT
+    char *uri; // Puerto del broker MQTT
     char *client_id; // ID del cliente MQTT
     char *username; // Nombre de usuario para el broker MQTT
     char *password; // Contraseña para el broker MQTT
@@ -34,12 +39,14 @@ typedef struct
 
 
 
-
 error_code_t Enable_wifi(Wifi_config_t *wifi_config);
 
 void Disable_wifi(void);
 
 error_code_t mqtt_connect(mqtt_config_t *mqtt_config);
+
+static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
+    int32_t event_id, void *event_data);
 
 void mqtt_disconnect(void);
 

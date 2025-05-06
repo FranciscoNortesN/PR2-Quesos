@@ -1,9 +1,13 @@
+/*@file Comunicaciones.c*/
 #include "Comunicaciones.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include "nvs_flash.h"
 #include "esp_log.h"
 #include "freertos/event_groups.h"
+
+volatile bool wifi_ready = false;
+volatile bool mqtt_ready = false;
 
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_MAX_WAIT_TIME_MS 5000 // Tiempo máximo de espera para la conexión Wi-Fi
@@ -18,7 +22,7 @@ static const char *TAG_WIFI = "WIFI";
 
 // Manejador de eventos Wi-Fi
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
-                               int32_t event_id, void* event_data)
+    int32_t event_id, void* event_data)
 {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
@@ -26,7 +30,9 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base,
         ESP_LOGW(TAG_WIFI, "Wi-Fi desconectado, intentando reconectar...");
         esp_wifi_connect();
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+        ESP_LOGI(TAG_WIFI, "Dirección IP obtenida");
         xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT);
+        wifi_ready = true;
     }
 }
 
@@ -80,52 +86,75 @@ void Disable_wifi(void)
 }
 // MQTT
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base,
-                               int32_t event_id, void *event_data)
+                                int32_t event_id, void *event_data)
 {
-    esp_mqtt_event_handle_t event = event_data;
-    switch (event->event_id) {
+esp_mqtt_event_handle_t event = event_data;
+
+    switch ((esp_mqtt_event_id_t)event_id) {
         case MQTT_EVENT_CONNECTED:
-            ESP_LOGI(TAG, "MQTT conectado.");
-            break;
+        ESP_LOGI("MQTT", "Conectado al broker");
+        mqtt_ready = true;
+        break;
         case MQTT_EVENT_DISCONNECTED:
-            ESP_LOGI(TAG, "MQTT desconectado.");
-            break;
+        ESP_LOGW("MQTT", "Desconectado del broker");
+        mqtt_ready = false;
+        break;
+        case MQTT_EVENT_ERROR:
+        ESP_LOGE("MQTT", "Error en MQTT");
+        break;
         default:
-            break;
+        break;
     }
 }
 
+
 error_code_t mqtt_connect(mqtt_config_t *mqtt_config)
-{
+{   
     esp_mqtt_client_config_t config = {
-        .broker.address.uri = mqtt_config->broker,
-        .credentials.client_id = mqtt_config->client_id,
-        .credentials.username = mqtt_config->username,
-        .credentials.authentication.password = mqtt_config->password,
+        .broker.address.uri = mqtt_config->uri,
+        .credentials.client_id = mqtt_config->client_id, 
     };
 
     client = esp_mqtt_client_init(&config);
+    if (client == NULL) {
+        ESP_LOGE("MQTT", "Fallo al inicializar cliente MQTT");
+        return MQTTError;
+    }
+
     esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
     esp_mqtt_client_start(client);
+
     return NoError;
 }
 
-void mqtt_disconnect(void)
+error_code_t mqtt_publish(mqtt_config_t *mqtt_config, const char *topic, const char *message, int qos)
+{
+    if (!client || !mqtt_ready) {
+        ESP_LOGE("MQTT", "Cliente MQTT no disponible o no listo");
+        return MQTTError;
+    }
+
+    int msg_id = esp_mqtt_client_publish(client, topic, message, 0, qos, 0);
+    if (msg_id < 0) {
+        ESP_LOGE("MQTT", "Error al publicar mensaje");
+        return MQTTError;
+    }
+
+    ESP_LOGI("MQTT", "Mensaje publicado correctamente, ID: %d", msg_id);
+    return NoError;
+}
+
+void mqtt_disconnect()
 {
     if (client) {
         esp_mqtt_client_stop(client);
         esp_mqtt_client_destroy(client);
         client = NULL;
+        mqtt_ready = false;
+        ESP_LOGI("MQTT", "Cliente MQTT desconectado");
     }
 }
 
-error_code_t mqtt_publish(mqtt_config_t *mqtt_config, const char *topic, const char *message, int qos)
-{
-    if (client) {
-        esp_mqtt_client_publish(client, topic, message, 0, qos, 0);
-    }
-    return NoError;
-}
 
 // Crear JSON
 error_code_t mqtt_create_json(int8_t temperature, uint8_t humidity, uint8_t battery_level, char **json_string)
