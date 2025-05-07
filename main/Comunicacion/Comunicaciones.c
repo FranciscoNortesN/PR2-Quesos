@@ -74,7 +74,7 @@ error_code_t Enable_wifi(Wifi_config_t *wifi_config)
         return WiFiError;
     }
 
-    ESP_LOGI(TAG_WIFI, "Conectado a Wi-Fi");
+    vTaskDelay(pdMS_TO_TICKS(4000));
     return NoError;
 }
 
@@ -139,7 +139,8 @@ error_code_t mqtt_publish(mqtt_config_t *mqtt_config, const char *topic, const c
         ESP_LOGE("MQTT", "Error al publicar mensaje");
         return MQTTError;
     }
-
+    //espera un tiempo para asegurar que el mensaje se publique
+    vTaskDelay(pdMS_TO_TICKS(100));
     ESP_LOGI("MQTT", "Mensaje publicado correctamente, ID: %d", msg_id);
     return NoError;
 }
