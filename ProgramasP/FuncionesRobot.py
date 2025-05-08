@@ -1,14 +1,7 @@
 from FuncionesBase import *
 
-SHOW_ERROR = True               # True para mostrar errores, False para no mostrar errores
+SHOW_ERROR = True
 
-""" Función para modificarle la velocidad a un robot. 
-    La función comprueba que el robot existe.
-    
-    Recibe el nombre del robot, la velocidad lineal, la aceleración lineal, 
-    la velocidad angular y la aceleración angular.
-    
-    Devuelve True si ha funcionado y False si no existe el robot."""
 def setSpeed(robot, velLineal, accelLineal, velAngular, accelAngular):
     if robot:
         robot.setSpeed(velLineal, velAngular, accelLineal, accelAngular)

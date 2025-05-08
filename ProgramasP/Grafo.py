@@ -4,12 +4,22 @@ import math
 class Grafo:
     def __init__(self):
         self.nodos = {}  # id -> posición [x, y]
-        self.vecinos = {}  # id -> lista de ids vecinos
+        self.nodosInversos = {}  # tuple(pos) -> id
+        self.vecinos = {}
+        self.nodo_actual = None
 
     def nodo(self, id, posicion):
         self.nodos[id] = posicion
         self.vecinos[id] = []
+        self.nodosInversos[tuple(posicion)] = id
         return id
+
+    def getID(self, posicion):
+        pos = tuple(posicion)
+        if pos in self.nodosInversos:
+            return self.nodosInversos[pos]
+        else:
+            return None
 
     def conect(self, id1, id2):
         if id2 not in self.vecinos[id1]:
@@ -20,6 +30,8 @@ class Grafo:
     def distancia(self, id1, id2):
         p1 = self.nodos[id1]
         p2 = self.nodos[id2]
+        for i in range(len(p1)):
+            print(f"p1: {p1[i]} p2: {p2[i]}")
         return math.dist(p1, p2)
 
     def camino(self, id_inicio, id_fin):

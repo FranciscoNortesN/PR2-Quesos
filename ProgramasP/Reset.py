@@ -1,9 +1,5 @@
-from robodk.robolink import *
-from threading import *
-from time import *
 from FuncionesBase import *
 from FuncionesRobot import *
-from CallPrograms import *
 from FuncionesQyB import *
 
 def resetMecanismo(nombreMecanismo):
@@ -17,7 +13,8 @@ def resetMecanismo(nombreMecanismo):
         "Guia1":[2.5],
         "MecanismoFinal":[0,280],
         "MecanismoTopeBandejaSalida":[-40],
-        "Mecanismo":[0,0,0,0,0,0]
+        "Mecanismo":[0,0,0,0,0,0],
+        "AGV":[-110, 2890,0,0],
     }
     for clave in posReset:
         if clave in nombreMecanismo:
@@ -32,9 +29,9 @@ def reset():
 
     for item in items:
         name = item.Name()
-        if name.startswith("Queso") and name != "Queso1":
+        if name.startswith("Queso") and name != "Queso1" and name != "Queso0":
             item.Delete()
-        elif name.startswith("Bandeja") and name != "Bandeja1":
+        elif name.startswith("Bandeja") and name != "Bandeja1" and name != "Bandeja0":
             item.Delete()
 
     delQuesos()
@@ -44,12 +41,16 @@ def reset():
     bandeja = getItem("Bandeja1", ITEM_TYPE_OBJECT)
     setVisibility(False,queso)
     setVisibility(False,bandeja)
+    queso0 = getItem("Queso0", ITEM_TYPE_OBJECT)
+    bandeja0 = getItem("Bandeja0", ITEM_TYPE_OBJECT)
+    setVisibility(False,queso0)
+    setVisibility(False,bandeja0)
     frameQ=getFrame("QuesosInicio")
     setParent(frameQ,queso)
     setParent(frameQ,bandeja)
+    setParent(frameQ,queso0)
+    setParent(frameQ,bandeja0)
 
     items = rdk.ItemList(ITEM_TYPE_ROBOT)
     for item in items:
         resetMecanismo(item.Name())
-
-reset()

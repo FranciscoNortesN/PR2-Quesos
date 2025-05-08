@@ -15,7 +15,6 @@ totalB = tuple(_totalB)
 lockQ = threading.Lock()
 lockB = threading.Lock()
 
-
 def setParent(frame, objetos):
     if not frame or not objetos:
         return None
@@ -45,7 +44,7 @@ def sensor(sensor_obj, objetos):
                 return obj
         return None
     else:
-        return objetos if detect_collision(objetos) else -1
+        return objetos if detect_collision(objetos) else None
 
 def dupItem(prefix, itemName, nombreLista, tipo=None, dupChildren=True):
     global _totalQ, _totalB, totalQ, totalB
@@ -78,10 +77,10 @@ def dupItem(prefix, itemName, nombreLista, tipo=None, dupChildren=True):
     return nuevoItem
 
 def addQueso():
-    return dupItem("Queso", "Queso1", "Quesos", ITEM_TYPE_OBJECT)
+    return dupItem("Queso", "Queso0", "Quesos", ITEM_TYPE_OBJECT)
 
 def addBandeja():
-    return dupItem("Bandeja", "Bandeja1", "Bandejas", ITEM_TYPE_OBJECT)
+    return dupItem("Bandeja", "Bandeja0", "Bandejas", ITEM_TYPE_OBJECT)
 
 def delCopies(Lista):
     global _totalQ, _totalB, totalQ, totalB

@@ -2,15 +2,12 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 from FuncionesBase import *
-from FuncionesMovimientos import *
 from FuncionesRobot import *
-from CallPrograms import *
 from FuncionesQyB import *
 from Reset import *
 from Grafo import *
 
-nodosEstacion = []
-nodosPasillo = []
+
 
 def conectarNodos(grafo, nodos):
     for i in range(len(nodos)):
@@ -21,21 +18,31 @@ def conectarNodos(grafo, nodos):
 def initGrafo():
     grafo = Grafo()
 
+    almacen1 = -5030
+    almacen2 = -480
+    almacen3 = 4090
+    baseCarga = 2890
+    Central1 = -660
+    Central2 = -145
+    Central3 = 340
+
     nodosEstacion = [
-        grafo.nodo("baseCarga", [-110, 2890]),
-        grafo.nodo("Central1", [-490, -660]),
-        grafo.nodo("Central2", [-490, -145]),
-        grafo.nodo("Central3", [-490, 340]),
+        grafo.nodo("baseCarga", [-110, baseCarga]),
+        grafo.nodo("Central1", [-490, Central1]),
+        grafo.nodo("Central2", [-490, Central2]),
+        grafo.nodo("Central3", [-490, Central3]),
     ]
 
+    grafo.nodoActual = "baseCarga"
+
     nodosPasilloGeneral = [
-        grafo.nodo("fueraAlmacen1", [-1220, -5030]),
-        grafo.nodo("fueraAlmacen2", [-1220, -430]),
-        grafo.nodo("fueraAlmacen3", [-1220, 4270]),
-        grafo.nodo("salirCentral1", [-1220, -660]),
-        grafo.nodo("salirCentral2", [-1220, -145]),
-        grafo.nodo("salirCentral3", [-1220, 340]),
-        grafo.nodo("salirCarga", [-1220, 2890])
+        grafo.nodo("fueraAlmacen1", [-1220, almacen1]),
+        grafo.nodo("fueraAlmacen2", [-1220, almacen2]),
+        grafo.nodo("fueraAlmacen3", [-1220, almacen3]),
+        grafo.nodo("salirCentral1", [-1220, Central1]),
+        grafo.nodo("salirCentral2", [-1220, Central2]),
+        grafo.nodo("salirCentral3", [-1220, Central3]),
+        grafo.nodo("salirCarga", [-1220, baseCarga]),
     ]
 
     conectarNodos(grafo, nodosPasilloGeneral)
@@ -46,7 +53,7 @@ def initGrafo():
 
     def crearAlmacen(grafo, numAlmacen, posy):
         posyfila1 = posy + 110
-        posyfila2 = posy + 1840
+        posyfila2 = posy + 2000
         
         def crearFila(grafo, numAlmacen, numFila, posy):
             estanteriasA = []
@@ -54,10 +61,10 @@ def initGrafo():
             estanteriasB = []
             pasillo.append(grafo.nodo(f"filaEntrada{numAlmacen}{numFila}", [-2660, posy]))
             for j in range(4):
-                x = -3320 - j * 500
-                estanteriasA.append(grafo.nodo(f"estanteriaA{numAlmacen}{numFila}{j}", [x, posy -585]))
+                x = -3230 - j * 500
+                estanteriasA.append(grafo.nodo(f"estanteriaA{numAlmacen}{numFila}{j}", [x, posy -545]))
                 pasillo.append(grafo.nodo(f"pasillo{numAlmacen}{numFila}{j}", [x, posy]))
-                estanteriasB.append(grafo.nodo(f"estanteriaB{numAlmacen}{numFila}{j}", [x, posy + 585]))
+                estanteriasB.append(grafo.nodo(f"estanteriaB{numAlmacen}{numFila}{j}", [x, posy + 545]))
                 grafo.conect(f"pasillo{numAlmacen}{numFila}{j}", f"estanteriaA{numAlmacen}{numFila}{j}")
                 grafo.conect(f"pasillo{numAlmacen}{numFila}{j}", f"estanteriaB{numAlmacen}{numFila}{j}")
             conectarNodos(grafo, pasillo)
@@ -77,11 +84,111 @@ def initGrafo():
         grafo.conect(f"entradaAlmacen{numAlmacen}", fila2[1][0])
         grafo.conect(f"entradaAlmacen{numAlmacen}", f"fueraAlmacen{numAlmacen}")
 
-    crearAlmacen(grafo, 1, -5030)
-    crearAlmacen(grafo, 2, -430)
-    crearAlmacen(grafo, 3, 4270)
+    crearAlmacen(grafo, 1, almacen1)
+    crearAlmacen(grafo, 2, almacen2)
+    crearAlmacen(grafo, 3, almacen3)
 
     return grafo
+
+def calcularAngulo(origen, destino):
+    dx = destino[0] - origen[0]
+    dy = destino[1] - origen[1]
+    anguloRad = math.atan2(dy, dx)
+    anguloDeg = math.degrees(anguloRad)
+    anguloDeg = anguloDeg - 90
+    return anguloDeg
+
+def generarCamino3D(camino2D, salidaMarchaAtras=False, anguloInicial=0):
+    if len(camino2D) < 2:
+        return [[x, y, 0, 0] for x, y in camino2D]  # Solo un punto
+
+    camino3D = []
+    puntoInicial = camino2D[0]
+    puntoSiguiente = camino2D[1]
+
+    # Calcular orientación inicial
+    orientacion = calcularAngulo(puntoInicial, puntoSiguiente)
+    if salidaMarchaAtras:
+        orientacion = anguloInicial
+
+    camino3D.append([puntoInicial[0], puntoInicial[1], 0, orientacion])
+    camino3D.append([puntoSiguiente[0], puntoSiguiente[1], 0, orientacion])
+
+
+    for i in range(2, len(camino2D)):
+        puntoAnterior = camino2D[i - 1]
+        puntoActual = camino2D[i]
+        nuevaOrientacion = calcularAngulo(puntoAnterior, puntoActual)
+
+        if not math.isclose(nuevaOrientacion, orientacion, abs_tol=1e-5):
+            camino3D.append([puntoAnterior[0], puntoAnterior[1], 0, nuevaOrientacion])
+            orientacion = nuevaOrientacion
+
+        camino3D.append([puntoActual[0], puntoActual[1], 0, orientacion])
+
+    return camino3D
+
+def callAGV(espera, grafo, quesos, bandejas):
+    agv = getRobot("AGV")
+    camino = grafo.camino(grafo.nodoActual, "Central3")
+    camino3d = generarCamino3D(camino)
+    if camino3d is None:
+        print("No se encontró un camino.")
+    else:
+        for i in range(len(camino3d)):
+            print(f"Posición {i}: {camino3d[i]}")
+            moveTo(agv, camino3d[i])
+            grafo.nodoActual = grafo.getID(camino3d[i][0:2])
+
+    TorreQuesosAGV = getItem("TorreQuesosAGV", ITEM_TYPE_OBJECT)
+    setVisibility(True, TorreQuesosAGV)
+    setVisibility(False, quesos)
+    setVisibility(False, bandejas)
+    Tool = getRobot("MecanismoAGVTool")
+    moveTo(Tool, [40])
+
+    estanteria = "estanteriaA310"
+    camino = grafo.camino("Central3", estanteria)
+    camino3d = generarCamino3D(camino, salidaMarchaAtras=True, anguloInicial=camino3d[-1][3])
+    if camino3d is None:
+        print("No se encontró un camino.")
+    else:
+        for i in range(len(camino3d)):
+            print(f"Posición {i}: {camino3d[i]}")
+            moveTo(agv, camino3d[i])
+            grafo.nodoActual = grafo.getID(camino3d[i][0:2])
+    espera.set()
+    moveTo(Tool, [10])
+
+    carpeta = getItem("FramesAlmacenes", ITEM_TYPE_FOLDER)
+    pos = camino3d[-1]
+    pos.append(0)
+    pos[0] = -pos[0] + 10 -50
+    pos[1] = pos[1] - 720 - 95
+    for i in range(len(pos)):
+        print(f"Posición {i}: {pos[i]}")
+    nuevoFrame = addFrame(f"TorreQuesos_{estanteria}", carpeta, pos)
+    rdk = getRDK()
+    item = getItem("TorreQuesos", ITEM_TYPE_OBJECT)
+    if not item:
+        return None
+    item.Copy()
+    nuevoItem = rdk.Paste()
+    nuevoItem.setName(f"TorreQuesos_{estanteria}")
+    setParent(nuevoFrame, nuevoItem)
+    setVisibility(True, nuevoItem)
+    setVisibility(False, TorreQuesosAGV)
+
+    camino = grafo.camino(estanteria, "baseCarga")
+    camino3d = generarCamino3D(camino, salidaMarchaAtras=True, anguloInicial=camino3d[-1][3])
+    if camino3d is None:
+        print("No se encontró un camino.")
+    else:
+        for i in range(len(camino3d)):
+            print(f"Posición {i}: {camino3d[i]}")
+            moveTo(agv, camino3d[i])
+            grafo.nodoActual = grafo.getID(camino3d[i][0:2])
+
 
 def visualizarGrafo(grafo, max_line_length=5, posiciones_destacadas=None):
     import textwrap
@@ -132,41 +239,13 @@ def visualizarGrafo(grafo, max_line_length=5, posiciones_destacadas=None):
     plt.grid(True)
     plt.show()
 
-def calcularAngulo(origen, destino):
-    dx = destino[0] - origen[0]
-    dy = destino[1] - origen[1]
-    anguloRad = math.atan2(dy, dx)
-    anguloDeg = math.degrees(anguloRad)
-    anguloDeg = anguloDeg - 90
-    return anguloDeg
-
-def generarCamino3D(camino2D):
-    if len(camino2D) < 2:
-        return [[x, y, 0, 0] for x, y in camino2D]  # Si solo hay un punto
-
-    camino3D = []
-    orientacionActual = calcularAngulo(camino2D[0], camino2D[1])
-    camino3D.append([camino2D[0][0], camino2D[0][1], 0, orientacionActual])
-
-    for i in range(1, len(camino2D)):
-        puntoAnterior = camino2D[i - 1]
-        puntoActual = camino2D[i]
-        nuevaOrientacion = calcularAngulo(puntoAnterior, puntoActual)
-
-        if not math.isclose(nuevaOrientacion, orientacionActual, abs_tol=1e-5):
-            camino3D.append([puntoAnterior[0], puntoAnterior[1], 0, nuevaOrientacion])
-            orientacionActual = nuevaOrientacion
-
-        camino3D.append([puntoActual[0], puntoActual[1], 0, orientacionActual])
-
-    return camino3D
 
 
 agv = getRobot("AGV")
 
 # Ejecutar
 grafo = initGrafo()
-camino = grafo.camino("estanteriaB222", "Central1")
+camino = grafo.camino("baseCarga", "estanteriaA310")
 camino3d = generarCamino3D(camino)
 if camino3d is None:
     print("No se encontró un camino.")

@@ -6,11 +6,15 @@ from FuncionesRobot import *
 from CallPrograms import *
 from FuncionesQyB import *
 from Reset import *
+from Grafo import *
+from AGV import *
 
 work = threading.Event()
+espera = threading.Event()
 
 def killThreads():
     work.set()
+    espera.set()
     for thread in threading.enumerate():
         if thread is not threading.current_thread():
             thread.join()
@@ -20,9 +24,6 @@ def reviveThreads():
     work.clear()
     print("Todos los hilos han revivido.", False)
 
-""" está puesto de tal manera que el sensor tiene asociado un mecanismo,
-un objetivo en el que el mecanismo acaba dejando ya sea el queso o la bandeja
-y unas coordenadas, que son hasta donde se mueve el mecanismo """
 configuracionesGeneral = {
     "SensorQueso5":("MecanismoCintaQueso5","Objeto_CintaQueso6",[1000]),
     "SensorQueso6":("MecanismoCintaQueso6","Objeto_CurvaQueso7",[1230]),
@@ -69,6 +70,9 @@ def cintaInicio(ready):
     ready.set()
 
     while not work.is_set():
+        espera.wait()
+        if work.is_set():
+            break
         listaQ = getAllQuesos()
         if len(listaQ) > len(detectaQ):
             nuevoQ = getLastQueso()
@@ -115,6 +119,9 @@ def curvaInicio(ready):
     ready.set()
 
     while not work.is_set():
+        espera.wait()
+        if work.is_set():
+            break
         listaQ = getAllQuesos()
         if len(listaQ) > len(detectaQ):
             nuevoQ = getLastQueso()
@@ -163,6 +170,9 @@ def separaBandejas(ready):
     ready.set()
 
     while not work.is_set():
+        espera.wait()
+        if work.is_set():
+            break
         listaB = getAllBandejas()
         if len(listaB) > len(detectaB):
             nuevoB = getLastBandeja()
@@ -217,6 +227,9 @@ def cintas(nombreSensor, ready):
     ready.set()
 
     while not work.is_set():
+        espera.wait()
+        if work.is_set():
+            break
         # Comprobamos si hay un nuevo objeto en la lista de objetos
         lista = getAllQuesos() if "Queso" in nombreSensor else getAllBandejas()
         if len(lista) > len(objeto):
@@ -248,6 +261,9 @@ def giraQuesos(ready):
     ready.set()
 
     while not work.is_set():
+        espera.wait()
+        if work.is_set():
+            break
         listaQ = getAllQuesos()
         if len(listaQ) > len(detectaQ):
             nuevoQ = getLastQueso()
@@ -286,6 +302,9 @@ def Guia(ready):
     ready.set()
 
     while not work.is_set():
+        espera.wait()
+        if work.is_set():
+            break
         listaB = getAllBandejas()
         if len(listaB) > len(detectaB):
             nuevoB = getLastBandeja()
@@ -328,6 +347,9 @@ def recogeBandejas(ready):
     ready.set()
 
     while not work.is_set():
+        espera.wait()
+        if work.is_set():
+            break
         listaQ = getAllQuesos()
         if len(listaQ) > len(detectaQ):
             nuevoQ = getLastQueso()
@@ -354,6 +376,8 @@ def paletizador(ready):
     robot = getRobot("UR20")
     frame = getFrame("Fork_Frame")
     detector = getItem("SensorPick", ITEM_TYPE_OBJECT)
+    quesosPaletizados = []
+    bandejasPaletizadas = []
 
     estantes = []
     for i in range(1, 10):
@@ -385,21 +409,24 @@ def paletizador(ready):
         if itemB is not None:
             bandejas.append(itemB)
 
+    grafo = initGrafo()
+
     ready.set()
 
     while not work.is_set():
+        espera.wait()
+        if work.is_set():
+            break
         listaQ = getAllQuesos()
         listaB = getAllBandejas()
 
         if len(listaQ) > len(quesos):
-            nuevoQ = getLastQueso()
-            itemQ = getItem(nuevoQ, ITEM_TYPE_OBJECT)
+            itemQ = getItem(getLastQueso(), ITEM_TYPE_OBJECT)
             if itemQ is not None:
                 quesos.append(itemQ)
 
         if len(listaB) > len(bandejas):
-            nuevoB = getLastBandeja()
-            itemB = getItem(nuevoB, ITEM_TYPE_OBJECT)
+            itemB = getItem(getLastBandeja(), ITEM_TYPE_OBJECT)
             if itemB is not None:
                 bandejas.append(itemB)
 
@@ -428,12 +455,17 @@ def paletizador(ready):
             setParent(framesEstantes[numero-1], queso)
             setParent(framesEstantes[numero-1], bandeja)
 
+            quesosPaletizados.append(queso)
+            bandejasPaletizadas.append(bandeja)
+
             if numero < 9:
                 moveTo(robot, estantesAproximacion[numero-1], "MoveL")
+                moveTo(robot, [107.70, -68.18, -127.88, -163.27, -161.66, -178.64])
             elif numero == 9:
                 moveTo(robot, [122.09, -82.27, -72.05, -26.25, -205.95, 0.19])
                 moveTo(robot, [95.55, -68.08, -118.11, -171.86, -173.80, -177.34])
+                moveTo(robot, [107.70, -68.18, -127.88, -163.27, -161.66, -178.64])
+                espera.clear()
+                callAGV(espera, grafo, quesosPaletizados, bandejasPaletizadas)
 
-
-            moveTo(robot, [107.70, -68.18, -127.88, -163.27, -161.66, -178.64])
 
