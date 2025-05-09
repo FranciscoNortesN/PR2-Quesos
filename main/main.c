@@ -9,7 +9,7 @@
 #include "cosas.h"
 
 #define TIMEPO_ENTRE_MUESTREO 900 //Segundos
-#define DIRECCION_BROKER "mqtt://192.168.18.17:1883"
+#define DIRECCION_BROKER "mqtt://192.168.1.159:1883"
 
 void app_main(void)
 {   
@@ -30,6 +30,11 @@ void app_main(void)
         .topic = "PR2/A9/NT"
     };
 
+    //Configuracion de la tarea
+    QueueHandle_t queue = xQueueCreate(1, sizeof(resultado_tarea_t));
+    resultado_tarea_t res = {.json_string = NULL, .estado = -1};
+    xTaskCreate(tarea_get_json, "tarea_get_json", 2048, (void *)queue, 5, NULL);
+
     //Variables Main
     uint8_t bateria = 0;
     int8_t temperatura = 0;
@@ -43,6 +48,7 @@ void app_main(void)
     esp_sleep_wakeup_cause_t causa = esp_sleep_get_wakeup_cause();
 
     if(!status){status = Init_pin_funcion();}
+
     if(!status){status = Enable_wifi(&wifi_config);}//funciona
     
     //Espera a la correcta inicializacion del cliente Wi-Fi
@@ -58,9 +64,6 @@ void app_main(void)
     }
 
     if(!status){status = mqtt_connect(&mqtt_config);}//Por testar
-    if(!status){status = get_data(&temperatura, &humedad, &bateria);}//funciona temperatura y humedad comprobar bateria
-    if(!status){status = mqtt_create_json(temperatura, humedad, bateria, &json_string);}//Funciona
-    
     //Espera a la correcta inicializacion del cliente MQTT
     while (!mqtt_ready) {
         vTaskDelay(pdMS_TO_TICKS(1000));
@@ -72,8 +75,22 @@ void app_main(void)
         }
         ESP_LOGI("MQTT", "Esperando a que MQTT esté listo... Intento %d", intentos);
     }
-    
-    if(!status){status = mqtt_publish(&mqtt_config, mqtt_config.topic, json_string, 0);}
+
+    //Recibe el resultado de la tarea
+    if (xQueueReceive(queue, &res, portMAX_DELAY)) {
+        if (res.estado != NoError) {
+            status = res.estado;
+            ESP_LOGE("MQTT", "Error al crear el JSON: %d", status);
+        } else {
+            json_string = res.json_string;
+        }
+    } else {
+        ESP_LOGE("MQTT", "No se pudo recibir el resultado de la tarea");
+        status = MQTTError;
+    }
+    ESP_LOGI("MQTT", "JSON salida de tarea: %s", json_string);
+
+    if(!status){status = mqtt_publish(&mqtt_config, mqtt_config.topic, json_string, 2);}
     if (json_string){free(json_string);}//funciona
     ESP_LOGI("Iniciando apagado--------------------------------------","");
     Disable_wifi();

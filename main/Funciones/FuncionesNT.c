@@ -5,6 +5,7 @@
 #include "esp_adc/adc_cali.h"
 #include "esp_adc/adc_cali_scheme.h"
 #include "driver/dac.h"
+#include "../Comunicacion/Comunicaciones.h"
 
 error_code_t Init_pin_funcion(){//Revisar 
 
@@ -94,10 +95,10 @@ error_code_t Get_battery_level(uint8_t *battery_level) {
 
 
     // Calcular el porcentaje de batería en pasos de 10 
-    // 0% = 1.80 y 100% = 2.6v
+    // 0% = 1.80 y 100% = 2.8v
     voltage_mv = voltage_mv - 1800; // Restar 1.8V
-    voltage_mv = voltage_mv * 20 / 800; // Calcular porcentaje (0-100%)
-    return (uint8_t) voltage_mv * 5;
+     // Calcular porcentaje (0-100%)
+    *battery_level = voltage_mv * 100;
 
     return NoError;
 }
@@ -120,6 +121,24 @@ error_code_t Get_sensor_data(int8_t *temperature, uint8_t *humidity) {
 
 }
 
+void tarea_get_json(void *param)
+{
+    QueueHandle_t queue = (QueueHandle_t)param;
+    resultado_tarea_t res = {.json_string = NULL, .estado = -1};
+
+    uint8_t bateria = 0;
+    int8_t temperatura = 0;
+    uint8_t humedad = 0;
+
+    error_code_t status = get_data(&temperatura, &humedad, &bateria);
+    if (!status) {
+        status = mqtt_create_json(temperatura, humedad, bateria, &res.json_string);
+    }
+
+    res.estado = status;
+    xQueueSend(queue, &res, portMAX_DELAY);
+    vTaskDelete(NULL);
+}
 
 error_code_t Show_status_led(error_code_t status){
 

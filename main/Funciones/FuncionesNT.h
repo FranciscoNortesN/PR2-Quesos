@@ -21,6 +21,10 @@
 #define Pin_bateria 34          // Pin entrada para senial de la bateria
 #define Pin_enable_divisorR 25  // Pin salida para activar el divisor de tension de la bateria
 
+typedef struct {
+    char *json_string;
+    int estado; // -1 no terminado, 0 sin error, >0 error_code_t
+} resultado_tarea_t;
 
 //Inicializa los pines de la placa
 error_code_t Init_pin_funcion(void);
@@ -31,8 +35,12 @@ error_code_t get_data(int8_t *temperature, uint8_t *humidity, uint8_t *battery_l
 //que representa el nivel de carga de la bateria
 //Por debajo de 20 se considera bateria baja
 error_code_t Get_battery_level(uint8_t *battery_level);
+
 //Lee el senial del sensor y devuelve la temperatura y humedad
 error_code_t Get_sensor_data(int8_t *temperature, uint8_t *humidity);
+
+//Crea un json con los datos de temperatura, humedad y bateria
+void tarea_get_json(void *param);
 
 error_code_t Show_status_led(error_code_t status);
 
