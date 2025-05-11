@@ -7,6 +7,7 @@ from CallPrograms import *
 from FuncionesQyB import *
 from Reset import *
 from FuncionesMovimientos import *
+from mqtt_modular import *
 
 print(f"Aviso, dependiendo de tu ordenador, el estado de la estación antes de ejecutar el programa y si se ha ejecutado el programa antes, puede tardar un poco en ejecutarse.")
 reset()
@@ -81,6 +82,9 @@ def spawnQueso():
         else:
             flanco = False
 
+# Inicializamos y nos conectamos al topic
+set_prefix("PR2/A9/RoboDK/")
+setup_mqtt()
 
 hilos = []
 

@@ -8,6 +8,8 @@ from FuncionesQyB import *
 from Reset import *
 from Grafo import *
 from AGV import *
+from mqtt_modular import *
+import json
 
 work = threading.Event()
 espera = threading.Event()
@@ -189,6 +191,16 @@ def separaBandejas(ready):
 
         num = sensor(detector,detectaB)
         if num is not None:
+            #MQTT
+            mensaje = {
+                "sensor_id": "sensorSeparabandejas",
+                "evento": "Queso detectado",
+                "queso_id": f"{num}"
+            }
+
+            mensaje_json = json.dumps(mensaje)
+            publish("Sensores/logs", mensaje_json)
+
             moveTo(robot, [530])
             moveTo(robot2, [0,0])
             setParent(frame3,num)
@@ -239,7 +251,7 @@ def cintas(nombreSensor, ready):
                 objeto.append(item)
 
         num = sensor(detector, objeto)
-        if num is not None:
+        if num is not None:          
             moveTo(robot, pos)
             setParent(objetivo, num)
             resetMecanismo(mecanismo)
@@ -273,6 +285,16 @@ def giraQuesos(ready):
 
         num = sensor(detector,detectaQ)
         if num is not None:
+            #MQTT
+            mensaje = {
+                "sensor_id": "sensorGiraQuesos",
+                "evento": "Queso detectado",
+                "queso_id": f"{num}"
+            }
+
+            mensaje_json = json.dumps(mensaje)
+            publish("Sensores/logs", mensaje_json)
+
             moveTo(robot, [400])
             moveTo(robot2, [180])
             moveTo(robot3, [60])
@@ -314,6 +336,16 @@ def Guia(ready):
 
         num = sensor(detector,detectaB)
         if num is not None:
+            #MQTT
+            mensaje = {
+                "sensor_id": "sensorGuia",
+                "evento": "Queso detectado",
+                "queso_id": f"{num}"
+            }
+
+            mensaje_json = json.dumps(mensaje)
+            publish("Sensores/logs", mensaje_json)
+
             moveTo(robot, [250])
             setParent(frame,num)
             moveTo(robot2, [566])
@@ -366,6 +398,16 @@ def recogeBandejas(ready):
 
         num = sensor(detector,detectaQ)
         if num is not None:
+            #MQTT
+            mensaje = {
+                "sensor_id": "sensorRecogeBandejas",
+                "evento": "Queso detectado",
+                "queso_id": f"{num}",
+            }
+
+            mensaje_json = json.dumps(mensaje)
+            publish("Sensores/logs", mensaje_json)
+
             bandeja = detectaB[detectaQ.index(num)]
             moveTo(robot, [-60, 980])
             setParent(frame,num)
@@ -432,6 +474,16 @@ def paletizador(ready):
 
         queso = sensor(detector, quesos)
         if queso is not None:
+            #MQTT
+            mensaje = {
+                "sensor_id": "sensorPaletizar",
+                "evento": "Paletizando Queso",
+                "queso_id": f"{queso}"
+            }
+
+            mensaje_json = json.dumps(mensaje)
+            publish("Sensores/logs", mensaje_json)
+            
             numero = (quesos.index(queso)) % 9 + 1
             bandeja = bandejas[quesos.index(queso)]
 
@@ -467,5 +519,3 @@ def paletizador(ready):
                 moveTo(robot, [107.70, -68.18, -127.88, -163.27, -161.66, -178.64])
                 espera.clear()
                 callAGV(espera, grafo, quesosPaletizados, bandejasPaletizadas)
-
-

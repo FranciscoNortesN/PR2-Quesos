@@ -6,8 +6,10 @@ from FuncionesRobot import *
 from FuncionesQyB import *
 from Reset import *
 from Grafo import *
+from mqtt_modular import*
+import json
 
-
+estanteria_destino = None
 
 def conectarNodos(grafo, nodos):
     for i in range(len(nodos)):
@@ -128,12 +130,32 @@ def generarCamino3D(camino2D, salidaMarchaAtras=False, anguloInicial=0):
 
     return camino3D
 
+estanteria_destino = None
+
+import time
+
+estanteria_destino = None  # Global para que el callback la modifique
+
 def callAGV(espera, grafo, quesos, bandejas):
+    global estanteria_destino
+    estanteria_destino = None  # Resetear al inicio de la función
+
+    def obtener_estanteria(topic, payload):
+        global estanteria_destino
+        estanteria = payload.strip()
+        if estanteria:
+            estanteria_destino = estanteria
+            publish("AGV/logs", f"Destino actualizado a: {estanteria_destino}")
+
+    register_callback("AGV", obtener_estanteria)
+
+    baseAGV = getFrame("AGV")
     agv = getRobot("AGV")
     camino = grafo.camino(grafo.nodoActual, "Central3")
     camino3d = generarCamino3D(camino)
     if camino3d is None:
-        print("No se encontró un camino.")
+        print("No se encontró un camino a Central3.")
+        return
     else:
         for i in range(len(camino3d)):
             print(f"Posición {i}: {camino3d[i]}")
@@ -147,11 +169,16 @@ def callAGV(espera, grafo, quesos, bandejas):
     Tool = getRobot("MecanismoAGVTool")
     moveTo(Tool, [40])
 
-    estanteria = "estanteriaA310"
-    camino = grafo.camino("Central3", estanteria)
+    # Espera indefinida hasta recibir estanteria_destino
+    print("Esperando destino de estantería...")
+    while estanteria_destino is None:
+        time.sleep(0.1)
+
+    camino = grafo.camino("Central3", estanteria_destino)
     camino3d = generarCamino3D(camino, salidaMarchaAtras=True, anguloInicial=camino3d[-1][3])
     if camino3d is None:
-        print("No se encontró un camino.")
+        print("No se encontró un camino hacia la estantería.")
+        return
     else:
         for i in range(len(camino3d)):
             print(f"Posición {i}: {camino3d[i]}")
@@ -163,26 +190,31 @@ def callAGV(espera, grafo, quesos, bandejas):
     carpeta = getItem("FramesAlmacenes", ITEM_TYPE_FOLDER)
     pos = camino3d[-1]
     pos.append(0)
-    pos[0] = -pos[0] + 10 -50
-    pos[1] = pos[1] - 720 - 95
+    if "estanteriaA" in estanteria_destino:
+        pos[0] = pos[0] - 370 + 30
+        pos[1] = pos[1] + 150 - 60 + 120
+    elif "estanteriaB" in estanteria_destino:
+        pos[0] = pos[0] - 370 + 30 -20
+        pos[1] = pos[1] - 150 - 60 + 120 + 180 + 400 -60
     for i in range(len(pos)):
         print(f"Posición {i}: {pos[i]}")
-    nuevoFrame = addFrame(f"TorreQuesos_{estanteria}", carpeta, pos)
+    nuevoFrame = addFrame(f"TorreQuesos_{estanteria_destino}", carpeta, pos)
     rdk = getRDK()
     item = getItem("TorreQuesos", ITEM_TYPE_OBJECT)
     if not item:
         return None
     item.Copy()
     nuevoItem = rdk.Paste()
-    nuevoItem.setName(f"TorreQuesos_{estanteria}")
+    nuevoItem.setName(f"TorreQuesos_{estanteria_destino}")
+    setParent(baseAGV, nuevoFrame)
     setParent(nuevoFrame, nuevoItem)
     setVisibility(True, nuevoItem)
     setVisibility(False, TorreQuesosAGV)
 
-    camino = grafo.camino(estanteria, "baseCarga")
+    camino = grafo.camino(estanteria_destino, "baseCarga")
     camino3d = generarCamino3D(camino, salidaMarchaAtras=True, anguloInicial=camino3d[-1][3])
     if camino3d is None:
-        print("No se encontró un camino.")
+        print("No se encontró un camino hacia baseCarga.")
     else:
         for i in range(len(camino3d)):
             print(f"Posición {i}: {camino3d[i]}")
@@ -238,14 +270,13 @@ def visualizarGrafo(grafo, max_line_length=5, posiciones_destacadas=None):
     plt.axis('equal')
     plt.grid(True)
     plt.show()
-
-
+    
 
 agv = getRobot("AGV")
 
 # Ejecutar
 grafo = initGrafo()
-camino = grafo.camino("baseCarga", "estanteriaA310")
+camino = grafo.camino("baseCarga", "estanteriaB110")
 camino3d = generarCamino3D(camino)
 if camino3d is None:
     print("No se encontró un camino.")

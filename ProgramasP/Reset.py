@@ -33,6 +33,14 @@ def reset():
             item.Delete()
         elif name.startswith("Bandeja") and name != "Bandeja1" and name != "Bandeja0":
             item.Delete()
+        elif name.startswith("TorreQuesos_estanteria"):
+            item.Delete()
+    
+    items = rdk.ItemList(ITEM_TYPE_FRAME)
+    for item in items:
+        name = item.Name()
+        if name.startswith("TorreQuesos_estanteria") and name != "TorreQuesosAGV":
+            item.Delete()
 
     delQuesos()
     delBandejas()
@@ -43,8 +51,10 @@ def reset():
     setVisibility(False,bandeja)
     queso0 = getItem("Queso0", ITEM_TYPE_OBJECT)
     bandeja0 = getItem("Bandeja0", ITEM_TYPE_OBJECT)
+    torreQuesos = getItem("TorreQuesosAGV", ITEM_TYPE_OBJECT)
     setVisibility(False,queso0)
     setVisibility(False,bandeja0)
+    setVisibility(False,torreQuesos)
     frameQ=getFrame("QuesosInicio")
     setParent(frameQ,queso)
     setParent(frameQ,bandeja)
