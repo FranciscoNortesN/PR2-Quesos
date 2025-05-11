@@ -161,3 +161,21 @@ CREATE TABLE IF NOT EXISTS userlogin (
     CONSTRAINT id_usuario_userslogin_fk FOREIGN KEY ("id_usuario") REFERENCES USERS
     ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+--Preguntas-Web-------------------------------------------------------------
+
+CREATE SEQUENCE formulario_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+CREATE TABLE IF NOT EXISTS formularios (
+    "id_formularuio" integer PRIMARY KEY DEFAULT nextval('formulario_seq'),
+    "nombre" char(50),
+    "correo" char(50) NOT NULL,
+    "mensaje" char(500) NOT NULL,
+    "fecha" timestamp NOT NULL DEFAULT NOW(),
+);
+
