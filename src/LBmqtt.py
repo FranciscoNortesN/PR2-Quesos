@@ -8,8 +8,10 @@ _client = None
 _lock = threading.Lock()
 
 _GLOBAL_TOPIC_PREFIX = "PR2/A9/"
+_GLOBAL_CALLBACKS = None
 
-BROKER="0.0.0.0"
+
+BROKER="mosquitto"
 BROKERREMOTE="100.93.177.37"
 PORT=1883
 
@@ -19,10 +21,20 @@ def register_callback(sub_topic, callback):
         full_topic = _GLOBAL_TOPIC_PREFIX + sub_topic
         _callbacks.append((full_topic, callback))
 
+def register_global_callback(callback):
+    """Registra una función callback global que se ejecuta para todos los mensajes."""
+    global _GLOBAL_CALLBACKS
+    _GLOBAL_CALLBACKS = callback
+
 def on_message(client, userdata, msg):
     topic = msg.topic
     payload = msg.payload.decode()
 
+    # Callback global primero (si existe)
+    if _GLOBAL_CALLBACKS:
+        threading.Thread(target=_GLOBAL_CALLBACKS, args=(topic, payload), daemon=True).start()
+
+    # Callbacks por subtopic
     with _lock:
         for sub_topic, callback in _callbacks:
             if topic_matches_sub(sub_topic, topic):
@@ -43,6 +55,7 @@ def setup_mqtt(client_id=None, broker=BROKERREMOTE, port=1883):
         _client.subscribe(f"{_GLOBAL_TOPIC_PREFIX}#")
     else:
         raise ValueError("El prefijo global no está definido.")
+    print(f"[MQTT] Conectado a {broker}:{port} con ID {client_id}")
 
 
 def disconnect():
