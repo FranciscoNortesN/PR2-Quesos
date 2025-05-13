@@ -271,7 +271,7 @@ def visualizarGrafo(grafo, max_line_length=5, posiciones_destacadas=None):
     plt.grid(True)
     plt.show()
     
-
+"""
 agv = getRobot("AGV")
 
 # Ejecutar
@@ -286,3 +286,4 @@ else:
     for i in range(len(camino3d)):
         moveTo(agv, camino3d[i])
 visualizarGrafo(grafo, posiciones_destacadas=camino)
+"""

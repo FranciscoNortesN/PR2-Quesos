@@ -37,21 +37,25 @@ def on_message(client, userdata, msg):
             if topic_matches_sub(sub_topic, topic):
                 threading.Thread(target=callback, args=(topic, payload), daemon=True).start()
 
-def setup_mqtt(client_id=None, broker=BROKER, port=1883):
+def setup_mqtt():
     """Inicia el cliente MQTT, se suscribe automáticamente a {prefix}#."""
-    if client_id is None:
+    rdk = getRDK()
+    MQTT = rdk.getParam("Activar MQTT")
+    if MQTT:
+        broker = rdk.getParam("Broker MQTT")
+        port = int(rdk.getParam("Puerto MQTT"))
         client_id = str(uuid.uuid4())
-    global _client
-    _client = mqtt.Client(client_id=client_id)
-    _client.on_message = on_message
-    _client.connect(broker, port)
-    _client.loop_start()
+        global _client
+        _client = mqtt.Client(client_id=client_id)
+        _client.on_message = on_message
+        _client.connect(broker, port)
+        _client.loop_start()
 
-    # Suscripción general a todos los topics bajo el prefijo
-    if _topic_prefix:
-        _client.subscribe(_topic_prefix + "#")
+        # Suscripción general a todos los topics bajo el prefijo
+        if _topic_prefix:
+            _client.subscribe(_topic_prefix + "#")
 
-    print(f"Conectado a {broker}:{port} con ID {client_id}. Suscrito a {_topic_prefix}#")
+        print(f"Conectado a {broker}:{port} con ID {client_id}. Suscrito a {_topic_prefix}#")
 
 
 def publish(topic, message, qos=0, retain=False):
