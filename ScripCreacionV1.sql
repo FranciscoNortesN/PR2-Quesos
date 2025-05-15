@@ -15,12 +15,15 @@ CREATE TABLE IF NOT EXISTS almacen (
 
 CREATE TABLE IF NOT EXISTS estanteria (
     "id_estanteria" char(10) PRIMARY KEY,
-    "localizacion" char(10) NOT NULL,
-    "tipo_queso" char(10) NOT NULL,
-    "fecha_inicio" date NOT NULL, -- solo el día de instalación
+    "fila" integer NOT NULL CHECK ("fila" >= 0),
+    "columna" integer NOT NULL CHECK ("columna" >= 0),
+    "lado" char(1) NOT NULL CHECK ("lado" IN ('A', 'B', 'C')),
+    "tipo_queso" char(15),
+    "status" char(10) NOT NULL CHECK ("status" IN ('llena', 'vacia')),
+    "fecha_inicio" date NOT NULL DEFAULT NOW(), -- solo el día de instalación
     "id_almacen" char(10),
     CONSTRAINT id_almacen_estanteria_fk FOREIGN KEY ("id_almacen") REFERENCES almacen 
-    ON DELETE CASCADE ON UPDATE CASCADE    
+    ON DELETE CASCADE ON UPDATE CASCADE 
 );
 
 -- Nodos de temperatura y humedad -----------------------------------------------
@@ -191,13 +194,13 @@ CREATE SEQUENCE topic_seq
 
 CREATE TABLE IF NOT EXISTS mqtt_topics (
     "id_topic" integer PRIMARY KEY DEFAULT nextval('topic_seq'),
-    "topic" char(50) NOT NULL,
+    "topic" char(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS mqtt_datos (
     "id_dato" integer NOT NULL,
     "fecha" timestamp NOT NULL DEFAULT NOW(),
-    "payload" char(500) NOT NULL,
+    "payload" char NOT NULL,
     CONSTRAINT id_topic_mqtt_datos_fk FOREIGN KEY ("id_topic") REFERENCES mqtt_topics
     ON DELETE CASCADE ON UPDATE CASCADE
 );
