@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS almacen (
 
 CREATE TABLE IF NOT EXISTS estanteria (
     "id_estanteria" char(10) PRIMARY KEY,
-    "fila" integer NOT NULL CHECK ("fila" >= 0),
+    "fila" integer NOT NULL CHECK ("fila" >= 1),
     "columna" integer NOT NULL CHECK ("columna" >= 0),
     "lado" char(1) NOT NULL CHECK ("lado" IN ('A', 'B', 'C')),
     "tipo_queso" char(15),
