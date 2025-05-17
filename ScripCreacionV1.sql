@@ -18,10 +18,12 @@ CREATE TABLE IF NOT EXISTS estanteria (
     "fila" integer NOT NULL CHECK ("fila" >= 1),
     "columna" integer NOT NULL CHECK ("columna" >= 0),
     "lado" char(1) NOT NULL CHECK ("lado" IN ('A', 'B', 'C')),
-    "tipo_queso" char(15),
     "status" char(10) NOT NULL CHECK ("status" IN ('llena', 'vacia')),
     "fecha_inicio" date NOT NULL DEFAULT NOW(), -- solo el día de instalación
     "id_almacen" char(10),
+    "ref_queso" char(10),
+    CONSTRAINT id_queso_estanteria_fk FOREIGN KEY ("ref_queso") REFERENCES queso
+    ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT id_almacen_estanteria_fk FOREIGN KEY ("id_almacen") REFERENCES almacen 
     ON DELETE CASCADE ON UPDATE CASCADE 
 );
@@ -167,7 +169,7 @@ CREATE TABLE IF NOT EXISTS userlogin (
 
 -- Preguntas-Web -------------------------------------------------------------
 
-CREATE SEQUENCE formulario_seq
+CREATE SEQUENCE IF NOT EXISTS formulario_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -185,7 +187,7 @@ CREATE TABLE IF NOT EXISTS formularios (
 --Datos MQTT -------------------------------------------------------------
 
 
-CREATE SEQUENCE topic_seq
+CREATE SEQUENCE IF NOT EXISTS topic_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
