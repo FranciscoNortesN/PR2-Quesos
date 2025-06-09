@@ -1,7 +1,6 @@
 -- Nombre: Script Creacion.sql
 -- Script Creacion.sql para PostgreSQL V0.1 Proyecto Queso
 -- VICENTE BURDEUS SANCHEZ
--- Fecha: 2023-10-05
 -- HORA : 17:08
 
 -- Almacenes --------------------------------------------------------------

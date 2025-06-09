@@ -1,7 +1,15 @@
+DROP TABLE IF EXISTS preguntas;
+DROP TABLE IF EXISTS preguntas_res;
+DROP TABLE IF EXISTS preguntas_sli;
+DROP TABLE IF EXISTS preguntas_num;
+DROP TABLE IF EXISTS respuestas;
+
 CREATE TABLE IF NOT EXISTS preguntas (
     id_pregunta INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     pregunta TEXT NOT NULL,
     tipo_pregunta TEXT NOT NULL
+    consejo TEXT,
+    consejo_trigger UNSIGNED INTEGER 
 );
 
 CREATE TABLE IF NOT EXISTS preguntas_res (
